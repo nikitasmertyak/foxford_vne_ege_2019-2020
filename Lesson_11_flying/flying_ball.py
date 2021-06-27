@@ -2,25 +2,42 @@ import tkinter as tk
 from random import randint
 
 WIDTH, HEIGHT = 450, 380
+DT =  1
 
 
 # ========= Model ==============
 def ball_init():
-    global ball_id, ball_x, ball_y, ball_image, ball_radius
+    global ball_id, ball_x, ball_y, ball_image, ball_radius, ball_vx, ball_vy
     ball_image = tk.PhotoImage(file = "ball.png")
     ball_width, ball_height = ball_image.width(), ball_image.height()
     assert ball_width == ball_height, "C такой картинкой не работает."
     ball_radius = ball_width // 2
-    ball_x = randint(ball_radius, WIDTH - ball_radius)
-    ball_y = randint(ball_radius, HEIGHT - ball_radius)
+    ball_x = randint(ball_radius, WIDTH - ball_radius - 1)
+    ball_y = randint(ball_radius, HEIGHT - ball_radius - 1)
+    ball_vx = randint(-5, 5)
+    ball_vy = randint(-5, 5)
     ball_id = canvas.create_image(ball_x, ball_y, image = ball_image)
 
 
 # смещение на холсте
 def ball_move():
-    global ball_x
+    global ball_x, ball_vx, ball_y, ball_vy
     canvas.coords(ball_id, ball_x, ball_y,)
-    ball_x += 1
+    ball_x += ball_vx * DT
+    ball_y += ball_vy * DT
+    if ball_x <= ball_radius:
+        ball_x = ball_radius
+        ball_vx = - ball_vx
+    if ball_y <= ball_radius:
+        ball_y = ball_radius
+        ball_vy = - ball_vy
+    if ball_x >= WIDTH - ball_radius - 1:
+        ball_x = WIDTH - ball_radius - 1
+        ball_vx = - ball_vx
+    if ball_y >= HEIGHT - ball_radius - 1:
+        ball_y = HEIGHT - ball_radius - 1
+        ball_vy = - ball_vy
+
 
 
 # ========== Control and View =============
@@ -29,7 +46,6 @@ def canvas_click_handler(event):
     global scores
     squared_distance = (ball_x - event.x) ** 2 + (ball_y - event.y) ** 2
     if squared_distance < ball_radius * ball_radius:
-        print("Ouch!!!")
         scores += 60 - ball_radius
         scores_label["text"] = str(scores)
         canvas.delete(ball_id)
