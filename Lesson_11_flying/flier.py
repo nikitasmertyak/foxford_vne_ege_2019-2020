@@ -3,22 +3,22 @@ import tkinter as tk
 WIDTH, HEIGHT = 450, 380
 
 
+# ========= Model ==============
 def flier_init():
-    global flier, flier_x, flier_y, flier_width, flier_height
-    flier_x, flier_y = 50, 25
-    flier_width, flier_height = 100, 50
-    flier = canvas.create_rectangle(flier_x, flier_y, flier_x + flier_width,
-                                    flier_y + flier_height, fill = "blue")
+    global flier, flier_x, flier_y, flier_width, flier_height, flier_image
+    flier_image = tk.PhotoImage(file = "ball.png")
+    flier_x, flier_y = 50, 75
+    flier_width, flier_height = flier_image.width(), flier_image.height()
+    flier = canvas.create_image(flier_x, flier_y, image = flier_image)
 
 
 # смещение на холсте
 def flier_move():
     global flier_x
-    canvas.coords(flier, flier_x, flier_y, flier_x + flier_width,
-                                    flier_y + flier_height)
+    canvas.coords(flier, flier_x, flier_y,)
     flier_x += 1
 
-
+# ========== Control and View =============
 # циклический перезапуск событий
 def next_frame_job(n):
     print("frame", n)
