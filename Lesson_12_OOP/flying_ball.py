@@ -6,37 +6,36 @@ DT =  1
 
 
 # ========= Model ==============
-def ball_init():
-    global ball_id, ball_x, ball_y, ball_image, ball_radius, ball_vx, ball_vy
-    ball_image = tk.PhotoImage(file = "ball.png")
-    ball_width, ball_height = ball_image.width(), ball_image.height()
-    assert ball_width == ball_height, "C такой картинкой не работает."
-    ball_radius = ball_width // 2
-    ball_x = randint(ball_radius, WIDTH - ball_radius - 1)
-    ball_y = randint(ball_radius, HEIGHT - ball_radius - 1)
-    ball_vx = randint(-5, 5)
-    ball_vy = randint(-5, 5)
-    ball_id = canvas.create_image(ball_x, ball_y, image = ball_image)
+class Ball:
+    def init(self):
+        self.image = tk.PhotoImage(file = "ball.png")
+        self.width, self.height = self.image.width(), self.image.height()
+        assert self.width == self.height, "C такой картинкой не работает."
+        self.radius = self.width // 2
+        self.x = randint(self.radius, WIDTH - self.radius - 1)
+        self.y = randint(self.radius, HEIGHT - self.radius - 1)
+        self.vx = randint(-5, 5)
+        self.vy = randint(-5, 5)
+        self.id = canvas.create_image(self.x, self.y, image = self.image)
 
 
-# смещение на холсте
-def ball_move():
-    global ball_x, ball_vx, ball_y, ball_vy
-    canvas.coords(ball_id, ball_x, ball_y,)
-    ball_x += ball_vx * DT
-    ball_y += ball_vy * DT
-    if ball_x <= ball_radius:
-        ball_x = ball_radius
-        ball_vx = - ball_vx
-    if ball_y <= ball_radius:
-        ball_y = ball_radius
-        ball_vy = - ball_vy
-    if ball_x >= WIDTH - ball_radius - 1:
-        ball_x = WIDTH - ball_radius - 1
-        ball_vx = - ball_vx
-    if ball_y >= HEIGHT - ball_radius - 1:
-        ball_y = HEIGHT - ball_radius - 1
-        ball_vy = - ball_vy
+    # смещение на холсте
+    def move(self):
+        canvas.coords(self.id, self.x, self.y,)
+        self.x += self.vx * DT
+        self.y += self.vy * DT
+        if self.x <= self.radius:
+            self.x = self.radius
+            self.vx = - self.vx
+        if self.y <= self.radius:
+            self.y = self.radius
+            self.vy = - self.vy
+        if self.x >= WIDTH - self.radius - 1:
+            self.x = WIDTH - self.radius - 1
+            self.vx = - self.vx
+        if self.y >= HEIGHT - self.radius - 1:
+            self.y = HEIGHT - self.radius - 1
+            self.vy = - self.vy
 
 
 
@@ -44,29 +43,29 @@ def ball_move():
 def canvas_click_handler(event):
     # print(event.x, event.y)
     global scores
-    squared_distance = (ball_x - event.x) ** 2 + (ball_y - event.y) ** 2
-    if squared_distance < ball_radius * ball_radius:
-        scores += 60 - ball_radius
+    squared_distance = (ball.x - event.x) ** 2 + (ball.y - event.y) ** 2
+    if squared_distance < ball.radius * ball.radius:
+        scores += 60 - ball.radius
         scores_label["text"] = str(scores)
-        canvas.delete(ball_id)
-        ball_init()
+        canvas.delete(ball.id)
+        ball.init()
 
 
 def restart_button_handler():
     scores = 0
     scores_label["text"] = str(scores)
-    canvas.delete(ball_id)
-    ball_init()
+    canvas.delete(ball.id)
+    ball.init()
 
 
 # циклический перезапуск событий
 def next_frame_job(n):
-    ball_move()
+    ball.move()
     canvas.after(20, next_frame_job, n + 1)
 
 
 def initilization():
-    global root, canvas, ball_id, scores, scores_label
+    global root, canvas, ball_id, scores, scores_label, ball
     root = tk.Tk()
     #root.geometry(f"{WIDTH}x{HEIGHT}")
     # создаём холст
@@ -82,7 +81,8 @@ def initilization():
                                command = restart_button_handler)
     restart_button.pack()
 
-    ball_init()
+    ball = Ball()
+    ball.init()
 
     # привязка событий
     canvas.bind("<Button - 1>", canvas_click_handler)
