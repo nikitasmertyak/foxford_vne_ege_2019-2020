@@ -7,7 +7,7 @@ DT =  1
 
 # ========= Model ==============
 class Ball:
-    def init(self):
+    def __init__(self):
         self.image = tk.PhotoImage(file = "ball.png")
         self.width, self.height = self.image.width(), self.image.height()
         assert self.width == self.height, "C такой картинкой не работает."
@@ -42,20 +42,29 @@ class Ball:
 # ========== Control and View =============
 def canvas_click_handler(event):
     # print(event.x, event.y)
-    global scores
+    global scores, ball
     squared_distance = (ball.x - event.x) ** 2 + (ball.y - event.y) ** 2
     if squared_distance < ball.radius * ball.radius:
         scores += 60 - ball.radius
         scores_label["text"] = str(scores)
+
         canvas.delete(ball.id)
-        ball.init()
+        ball = None
+
+        ball = Ball()
+        
 
 
 def restart_button_handler():
+    global ball
     scores = 0
     scores_label["text"] = str(scores)
+
     canvas.delete(ball.id)
-    ball.init()
+    ball = None
+
+    ball = Ball()
+    
 
 
 # циклический перезапуск событий
@@ -82,7 +91,7 @@ def initilization():
     restart_button.pack()
 
     ball = Ball()
-    ball.init()
+   
 
     # привязка событий
     canvas.bind("<Button - 1>", canvas_click_handler)
