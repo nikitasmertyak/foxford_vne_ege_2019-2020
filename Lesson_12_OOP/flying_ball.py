@@ -2,8 +2,8 @@ import tkinter as tk
 from random import randint
 
 WIDTH, HEIGHT = 450, 380
-DT =  1
-
+DT =  0.2
+GRAVITY_CONST = 3
 
 # ========= Model ==============
 class Ball:
@@ -23,7 +23,8 @@ class Ball:
     def move(self):
         canvas.coords(self.id, self.x, self.y,)
         self.x += self.vx * DT
-        self.y += self.vy * DT
+        self.y += self.vy * DT + GRAVITY_CONST * DT ** 2 / 2
+        self.vy += GRAVITY_CONST * DT
         if self.x <= self.radius:
             self.x = self.radius
             self.vx = - self.vx
@@ -46,8 +47,8 @@ class Ball:
 # ========== Control and View =============
 def canvas_click_handler(event):
     # print(event.x, event.y)
-    global scores, balls, ball
-    ball_to_delete_index = None
+    global scores, balls
+    ball_to_delete = None
     for ball in balls:
         if ball.is_inside(event.x, event.y):
             ball_to_delete =  ball
@@ -58,9 +59,6 @@ def canvas_click_handler(event):
         balls.remove(ball_to_delete)
         
 
-        
-
-
 def restart_button_handler():
     global balls
     scores = 0
@@ -69,7 +67,6 @@ def restart_button_handler():
         canvas.delete(ball.id)
     balls[:] = [Ball() for i in range(5)]
     
-
 
 # циклический перезапуск событий
 def next_frame_job(n):
