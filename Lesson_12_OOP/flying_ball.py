@@ -38,46 +38,51 @@ class Ball:
             self.vy = - self.vy
 
 
+    def is_inside(self, x, y):
+        squared_distance = (self.x - x) ** 2 + (self.y - y) ** 2
+        return squared_distance < self.radius * self.radius
+            
 
 # ========== Control and View =============
 def canvas_click_handler(event):
     # print(event.x, event.y)
-    global scores, ball
-    squared_distance = (ball.x - event.x) ** 2 + (ball.y - event.y) ** 2
-    if squared_distance < ball.radius * ball.radius:
+    global scores, balls, ball
+    ball_to_delete_index = None
+    for ball in balls:
+        if ball.is_inside(event.x, event.y):
+            ball_to_delete =  ball
+    if ball_to_delete is not None:
         scores += 60 - ball.radius
         scores_label["text"] = str(scores)
+        canvas.delete(ball_to_delete.id)
+        balls.remove(ball_to_delete)
+        
 
-        canvas.delete(ball.id)
-        ball = None
-
-        ball = Ball()
         
 
 
 def restart_button_handler():
-    global ball
+    global balls
     scores = 0
     scores_label["text"] = str(scores)
-
-    canvas.delete(ball.id)
-    ball = None
-
-    ball = Ball()
+    for ball in balls:
+        canvas.delete(ball.id)
+    balls[:] = [Ball() for i in range(5)]
     
 
 
 # циклический перезапуск событий
 def next_frame_job(n):
-    ball.move()
+    for ball in balls:
+        ball.move()
     canvas.after(20, next_frame_job, n + 1)
 
 
 def initilization():
-    global root, canvas, ball_id, scores, scores_label, ball
+    global root, canvas, ball_id, scores, scores_label, balls
     root = tk.Tk()
     #root.geometry(f"{WIDTH}x{HEIGHT}")
-    # создаём холст
+    #создаём холст
     canvas = tk.Canvas(root, height = HEIGHT, width = WIDTH,
                        background = "lightblue")
     canvas.pack()
@@ -90,7 +95,7 @@ def initilization():
                                command = restart_button_handler)
     restart_button.pack()
 
-    ball = Ball()
+    balls = [Ball() for i in range(5)]
    
 
     # привязка событий
