@@ -52,6 +52,26 @@ class Bubble:
         self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="cyan")
 
 
+    def move(self):
+        self._canvas.coords(self.id,
+                            self.x - self.r, self.y - self.r,
+                            self.x + self.r, self.y + self.r)
+        self.x += self.vx * DT
+        self.y += self.vy * DT
+
+        if self.x < self.r:
+            self.x = self.r
+            self.vx = -self.vx
+        if self.x > WIDTH - self.r:
+            self.x = WIDTH - self.r
+            self.vx = -self.vx
+        if self.y < self.r:
+            self.y = self.r
+            self.vy = -self.vy
+        if self.y > HEIGHT - self.r:
+            self.y = HEIGHT - self.r
+            self.vy = -self.vy
+
 # ========== Control and View =============
 
 class GameRound:
@@ -82,6 +102,8 @@ class GameRound:
 
     def handle_frame(self):
         print("handled_frame")
+        for target in self._targets:
+            target.move()
 
 
     def handle_click(self,event):
