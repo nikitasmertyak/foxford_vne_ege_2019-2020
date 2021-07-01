@@ -2,11 +2,13 @@ import tkinter as tk
 from random import randint
 
 WIDTH, HEIGHT = 450, 380
-DT =  0.2
+DT =  0.5
 GRAVITY_CONST = 3
 START_PAUSE = 1000
 FRAME_TIME = 20
 TANK_RADIUS = 25
+MIN_BUBBLE_RADIUS = 30
+MAX_BUBBLE_RADIUS = 40
 
 
 # ========= Model ==============
@@ -72,6 +74,20 @@ class Bubble:
             self.y = HEIGHT - self.r
             self.vy = -self.vy
 
+    def is_inside(self, other):
+         """ Проверяет, находятся ли шарики в пересечении (столкновении). """
+         dx = self.x - other.x
+         dy = self.y - other.y
+         squared_distance = dx**2 + dy**2
+         squared_radius_sum = (self.r + other.r)**2
+         return squared_distance <= squared_radius_sum
+
+    def collide(self, other):
+         """ Обмен скоростями при столновении. """
+         self.vx, other.vx = other.vx, self.vx
+         self.vy, other.vy = other.vy, self.vy
+         # FIXME!
+
 # ========== Control and View =============
 
 class GameRound:
@@ -91,7 +107,8 @@ class GameRound:
         self.bubbles_max_speed = difficulty * 2
         self._targets = []
         for i in range(self.bubbles_number):
-            r = randint(10 - difficulty, 25 - difficulty)
+            r = randint(MIN_BUBBLE_RADIUS - difficulty,
+                         MAX_BUBBLE_RADIUS - difficulty)
             x = randint(r + 1, WIDTH - r - 1)
             y = randint(r + 1, HEIGHT - r - 1)
             Vx = randint(-self.bubbles_max_speed, +self.bubbles_max_speed)
@@ -101,9 +118,15 @@ class GameRound:
 
 
     def handle_frame(self):
-        print("handled_frame")
         for target in self._targets:
             target.move()
+        # Попарное взаимодействие целей друг с другом
+        for i in range(len(self._targets) - 1):
+             for k in range(i + 1, len(self._targets)):
+                 target_1 = self._targets[i]
+                 target_2 = self._targets[k]
+                 if target_1.is_inside(target_2):
+                     target_1.collide(target_2)
 
 
     def handle_click(self,event):
