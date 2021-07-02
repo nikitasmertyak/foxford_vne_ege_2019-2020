@@ -23,7 +23,7 @@ class Tank:
         self.x = x
         self.y = y
         self._canvas = canvas
-        self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="darkgreen")
+        self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="green")
 
 
 class Shell:
@@ -161,11 +161,9 @@ class MainWindow:
 
     def start_game(self):
         canvas = tk.Canvas(self._root, height=HEIGHT, width=WIDTH,
-                           background="lightblue", border=3)
+                           background="blue", border=3)
         canvas.pack()
         self._game = GameRound(canvas)
-        canvas.bind("<Button - 1>", self._handle_click)  # естественно мой handle_click
-        canvas.after(START_PAUSE, self._handle_frame)
 
     def _restart_button_handler(self):
         if self._game is None:
