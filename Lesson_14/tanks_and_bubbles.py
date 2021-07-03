@@ -61,15 +61,34 @@ class Shell:
     """
 
     def __init__(self, x, y, vx, vy, r, canvas):
+        self._zombie = False
         self.x = x
         self.y = y
+        self._timeout = 200
         self.vx = vx
         self.vy = vy
         self.r = r
         self._canvas = canvas
         self.id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="black")
 
+    def is_zombie(self):
+        return self._zombie
+
+    def check_hit(self, target):
+        return target.is_inside(self)
+
+    def destroy(self):
+        self._zombie = True
+        self._canvas.delete(self.id)
+
+    def cause_damage(self, target):
+        self.destroy()
+        target.destroy()
+
     def move(self):
+        self._timeout -= 1
+        if self._timeout < 0:
+            self.destroy()
         self._canvas.coords(self.id,
                             self.x - self.r, self.y - self.r,
                             self.x + self.r, self.y + self.r)
@@ -90,6 +109,7 @@ class Shell:
             self.vy = -self.vy
 
 
+
 class Bubble:
     """ Пузырик, который разрушается снарядом,
         летает без действия гравитации,
@@ -98,6 +118,7 @@ class Bubble:
     """
 
     def __init__(self, x, y, vx, vy, r, canvas):
+        self._zombie = False
         self.x = x
         self.y = y
         self.vx = vx
@@ -139,6 +160,13 @@ class Bubble:
         self.vx, other.vx = other.vx, self.vx
         self.vy, other.vy = other.vy, self.vy
         # FIXME!
+
+    def destroy(self):
+        self._zombie = True
+        self._canvas.delete(self.id)
+
+    def is_zombie(self):
+        return self._zombie
 
 
 # ========== Control and View =============
@@ -184,8 +212,19 @@ class GameRound:
                 target_2 = self._targets[k]
                 if target_1.is_inside(target_2):
                     target_1.collide(target_2)
+        
         for shell in self._shells:
             shell.move()
+        
+        for shell in self._shells:
+            for target in self._targets:
+                if shell.check_hit(target):
+                    shell.cause_damage(target)
+        
+        for target in self._targets:
+            if target.is_zombie():
+                self._targets.remove(target)
+
         self._canvas.after(FRAME_TIME, self._handle_frame)
 
 
